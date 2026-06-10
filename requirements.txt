@@ -1,0 +1,4 @@
+flask
+gunicorn
+openai
+line-bot-sdk
