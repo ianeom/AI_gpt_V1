@@ -26,11 +26,10 @@ app = Flask(__name__)
 def home():
     return "AI Coach v2.1 Running"
 
-# ===== LINE Webhook =====
-@app.route("/callback", methods=["POST"])
-def callback():
-    pass
-    
+
+# =========================
+# ENV
+# =========================
 LINE_ACCESS_TOKEN = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN")
 LINE_SECRET = os.environ.get("LINE_CHANNEL_SECRET")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
@@ -88,12 +87,33 @@ def update_memory(user_id, user_memory, user_message, reply, full_memory):
 def build_context(memory):
     return f"""
 【使用者狀態】
-階段：{memory['stage']}
-最近行動：{memory['last_action']}
+階段：{memory.get('stage')}
+最近行動：{memory.get('last_action')}
 
 【最近對話】
 {memory['history'][-1] if memory['history'] else '無'}
 """
+
+
+# =========================
+# ROUTER
+# =========================
+def ai_router(user_message: str):
+    msg = user_message.strip().upper()
+
+    if msg in ["90天新人加速器", "起盤藍圖"]:
+        return "MENU"
+
+    if msg.startswith("W"):
+        return "WEEK"
+
+    if any(x in user_message for x in ["怎麼", "如何", "為什麼", "教我"]):
+        return "COACH"
+
+    if any(x in user_message for x in ["團隊", "帶人", "董事", "複製"]):
+        return "LEADER"
+
+    return "COACH"
 
 
 # =========================
@@ -128,29 +148,7 @@ def ask_gpt(user_message, memory, mode="COACH"):
 
 
 # =========================
-# ROUTER
-# =========================
-def ai_router(user_message: str):
-
-    msg = user_message.strip().upper()
-
-    if msg in ["90天新人加速器", "起盤藍圖"]:
-        return "MENU"
-
-    if msg.startswith("W"):
-        return "WEEK"
-
-    if any(x in user_message for x in ["怎麼", "如何", "為什麼", "教我"]):
-        return "COACH"
-
-    if any(x in user_message for x in ["團隊", "帶人", "董事", "複製"]):
-        return "LEADER"
-
-    return "COACH"
-
-
-# =========================
-# LINE WEBHOOK
+# LINE WEBHOOK (ONLY ONE)
 # =========================
 @app.route("/callback", methods=["POST"])
 def callback():
@@ -202,7 +200,7 @@ def handle_message(event):
 
 
 # =========================
-# RUN SERVER
+# RUN
 # =========================
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
