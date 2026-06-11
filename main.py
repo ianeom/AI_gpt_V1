@@ -155,14 +155,16 @@ def callback():
     signature = request.headers.get("X-Line-Signature")
     body = request.get_data(as_text=True)
 
+    print("🔥 callback hit")
+    print(body)
+
     try:
         handler.handle(body, signature)
-    except InvalidSignatureError:
+    except Exception as e:
+        print("❌ error:", str(e))
         abort(400)
 
     return "OK"
-
-
 # =========================
 # MESSAGE HANDLER
 # =========================
