@@ -141,7 +141,6 @@ def ask_gpt(user_message, memory, mode="COACH"):
         model="gpt-5",
         instructions=system_prompt + "\n\n" + context,
         input=user_message,
-        temperature=0.7
     )
 
     return response.output_text
