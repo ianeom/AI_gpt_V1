@@ -21,6 +21,16 @@ from linebot.v3.webhooks import MessageEvent, TextMessageContent
 # =========================
 app = Flask(__name__)
 
+# ===== Render 健康檢查 =====
+@app.route("/")
+def home():
+    return "AI Coach v2.1 Running"
+
+# ===== LINE Webhook =====
+@app.route("/callback", methods=["POST"])
+def callback():
+    pass
+    
 LINE_ACCESS_TOKEN = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN")
 LINE_SECRET = os.environ.get("LINE_CHANNEL_SECRET")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
