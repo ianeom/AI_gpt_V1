@@ -152,16 +152,17 @@ def ask_gpt(user_message, memory, mode="COACH"):
 # =========================
 @app.route("/callback", methods=["POST"])
 def callback():
-    signature = request.headers.get("X-Line-Signature")
     body = request.get_data(as_text=True)
+    signature = request.headers.get("X-Line-Signature")
 
-    print("🔥 callback hit")
+    print("🔥 CALLBACK HIT")
     print(body)
 
     try:
         handler.handle(body, signature)
+        print("🔥 HANDLER SUCCESS")
     except Exception as e:
-        print("❌ error:", str(e))
+        print("❌ HANDLER ERROR:", str(e))
         abort(400)
 
     return "OK"
@@ -177,6 +178,8 @@ def handle_message(event):
     memory, full_memory = get_user_memory(user_id)
 
     mode = ai_router(user_message)
+
+    print("🔥 MESSAGE TRIGGERED")
 
     # ===== 指令系統 =====
     if mode == "MENU":
