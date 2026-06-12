@@ -4,6 +4,10 @@ from flask import Flask, request, abort
 from openai import OpenAI
 from supabase import create_client, Client
 
+from business_engine import BusinessEngine   
+
+engine = BusinessEngine()                   
+
 from linebot.v3 import WebhookHandler
 from linebot.v3.messaging import (
     Configuration,
@@ -169,6 +173,20 @@ def handle_message(event):
 
     save_conversation(user_id, "user", user_message)
 
+    mode = route_message(user_message)
+
+    if mode == "BUSINESS":
+    pc_count = extract_pc_count(user_message)  # 可先簡化
+    result = engine.quick_preview(pc_count)
+    reply = f"""
+💰 商業試算結果
+
+PC數：{result['pc_count']}
+週收入：{result['weekly_income']}
+QDV：{result['qdv']}
+BV：{result['bv']}
+"""
+    
     # =========================
     # ⭐ 修正重點：只在第一次顯示 onboarding
     # =========================
@@ -193,6 +211,29 @@ def handle_message(event):
                 messages=[TextMessage(text=reply)]
             )
         )
+
+    # =========================
+    # 📊 商業計算類（→ Business Engine）
+    # =========================
+def route_message(msg: str):
+
+    msg = msg.strip()
+
+    # 📊 商業計算類（→ Business Engine）
+    if any(word in msg for word in ["收入", "賺多少", "QDV", "BV", "獎金", "週薪", "利潤"]):
+        return "BUSINESS"
+
+    # 📦 系統流程類
+    if msg in ["第1月", "W1", "W2", "W3", "W4"]:
+        return "FLOW_L1"
+
+    if "解鎖第二月" in msg:
+        return "UNLOCK_L2"
+
+    if msg in ["W5", "W6", "W7", "W8"]:
+        return "FLOW_L2"
+
+    return "AI"
 
 
 # =========================
