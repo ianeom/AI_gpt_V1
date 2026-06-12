@@ -14,6 +14,7 @@ from linebot.v3.messaging import (
 )
 from linebot.v3.webhooks import MessageEvent, TextMessageContent
 
+
 # =========================
 # APP INIT
 # =========================
@@ -72,42 +73,97 @@ def save_conversation(line_user_id, role, content):
 
 
 # =========================
+# 🔥 新人入口（ONBOARDING）
+# =========================
+def new_user_onboarding():
+    return (
+        "🚀 【90天新人加速器·最高指導原則】\n"
+        "1. 快速篩選優選客戶（PC+）\n"
+        "2. 複製二星經理\n"
+        "3. 目標一星董事\n\n"
+
+        "===SPLIT===\n"
+        "🎯 第一階段：【第1月·快速篩選 PC+ 愛用池】\n"
+        "💡 核心：累積 10-20 個 PC+ 自動送貨愛用池。\n"
+        "👉 輸入【第1月】即可解鎖第1-4週任務\n\n"
+
+        "===SPLIT===\n"
+        "🎯 第二階段：【第2月·複製二星經理】\n"
+        "💡 核心：建立幹部線，複製二星經理\n"
+        "🔒 輸入【解鎖第二月+密碼】\n\n"
+
+        "🎯 第三階段：【第3月·一星董事系統】\n"
+        "💡 核心：建廠插旗 + 六大獎金\n"
+        "🔒 輸入【解鎖第三月+密碼】"
+    )
+
+
+# =========================
 # AI ENGINE
 # =========================
-def ask_gpt(user_message, user):
+def ask_ai(user_message, user):
 
     system_prompt = f"""
-你是「戰將教練 肆伍參平哥AI助理」。
+你是【AI戰將教練 v3】。
+
+你在運作一個商業成交系統，而不是聊天機器人。
 
 系統版本：{SYSTEM_VERSION}
 
 使用者狀態：
-- 階段：{user.get('stage')}
-- 週數：{user.get('current_week')}
-- 連續打卡：{user.get('streak_days')}
+- 階段：{user.get("stage")}
+- 週數：{user.get("current_week")}
+- 連續打卡：{user.get("streak_days")}
 
-【核心任務】
-- 幫助新人 90 天內晉升一星董事
-- 只給「一個可執行行動」
-- 不講理論、不做長篇分析
-- 所有內容要能複製、能成交、能帶人
+【核心規則】
+1. 一次只給一個行動
+2. 不講大道理
+3. 必須導向成交或下一步行動
+4. 永遠要有下一步指令
+5. 簡短、可複製
+6. 用繁體中文
 
-【風格】
-- 像戰略教練，不像客服
-- 直接、有壓迫感、有方向
+【商業目標】
+- PC / PC+ 成交
+- BP 夥伴轉換
+- 複製二星經理
+- 一星董事系統化
 """
 
     try:
         response = client.responses.create(
             model="gpt-4o-mini",
             instructions=system_prompt,
-            input=user_message[:800],
+            input=user_message[:800]
         )
-        return response.output_text
+        return response.output_text.strip()
 
     except Exception as e:
         print("OPENAI ERROR:", e)
-        return "系統繁忙，請稍後再試"
+        return "先做一件事：找出3個有健康需求的人。"
+
+# =========================
+# FLOW CONTROLLER
+# =========================
+def flow_response(mode, msg):
+
+    if mode == "L1":
+        return "🚀 輸入【第1月】開始90天系統"
+
+    if mode == "UNLOCK_L2":
+        return "🔓 第二階段已解鎖，輸入【第2月大盤】"
+
+    if mode == "UNLOCK_L3":
+        return "🔓 第三階段已解鎖，輸入【第3月大盤】"
+
+    if mode == "L2":
+        return "🔥 第二階段執行中，輸入 W5~W8"
+
+    if mode == "L3":
+        return "🔥 第三階段執行中，輸入 W9~W12"
+
+    return None
+
 
 
 # =========================
@@ -140,20 +196,21 @@ def handle_message(event):
     print("USER ID:", user_id)
     print("MESSAGE:", user_message)
 
-    # 1️⃣ user
+    # 1️⃣ 取得 user
     user = get_user(user_id)
 
-    # 2️⃣ save user msg
+    # 🔥 2️⃣ 新人直接進 onboarding（重點）
+    if user.get("stage") == "Starter":
+        reply = new_user_onboarding()
+    else:
+        # 3️⃣ AI 回覆
+        reply = ask_ai(user_message, user)
+
+    # 4️⃣ 存紀錄
     save_conversation(user_id, "user", user_message)
 
-    # 3️⃣ AI reply
-    reply = ask_gpt(user_message, user)
-
-    # 4️⃣ save AI msg
-    save_conversation(user_id, "ai", reply)
-
-    # 5️⃣ reply LINE
-    with ApiClient(line_config) as api_client:
+    # 5️⃣ 回覆 LINE
+    with ApiClient(Configuration(access_token=LINE_ACCESS_TOKEN)) as api_client:
         line_bot_api = MessagingApi(api_client)
 
         line_bot_api.reply_message(
