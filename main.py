@@ -1,5 +1,4 @@
 import os
-import json
 from flask import Flask, request, abort
 
 from openai import OpenAI
@@ -15,62 +14,56 @@ from linebot.v3.messaging import (
 )
 from linebot.v3.webhooks import MessageEvent, TextMessageContent
 
-
 # =========================
 # APP INIT
 # =========================
 app = Flask(__name__)
 
+SYSTEM_VERSION = "v3"
+
 
 @app.route("/")
 def home():
-    return "AI Coach SaaS v3 Running"
+    return f"LINE AI 商業成交系統 {SYSTEM_VERSION} Running"
 
 
 # =========================
 # ENV
 # =========================
-LINE_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
-LINE_SECRET = os.getenv("LINE_CHANNEL_SECRET")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+LINE_ACCESS_TOKEN = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN")
+LINE_SECRET = os.environ.get("LINE_CHANNEL_SECRET")
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 line_config = Configuration(access_token=LINE_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_SECRET)
 
 client = OpenAI(api_key=OPENAI_API_KEY)
-
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
 # =========================
-# SUPABASE HELPERS
+# SUPABASE
 # =========================
-def get_user(line_user_id: str):
-    res = (
-        supabase.table("users")
-        .select("*")
-        .eq("line_user_id", line_user_id)
-        .execute()
-    )
+def get_user(line_user_id):
+    res = supabase.table("users").select("*").eq("line_user_id", line_user_id).execute()
 
     if not res.data:
-        new_user = {
+        user = {
             "line_user_id": line_user_id,
             "stage": "Starter",
             "current_week": 1,
             "streak_days": 0
         }
-
-        supabase.table("users").insert(new_user).execute()
-        return new_user
+        supabase.table("users").insert(user).execute()
+        return user
 
     return res.data[0]
 
 
-def save_conversation(line_user_id: str, role: str, content: str):
+def save_conversation(line_user_id, role, content):
     supabase.table("conversations").insert({
         "line_user_id": line_user_id,
         "role": role,
@@ -81,31 +74,35 @@ def save_conversation(line_user_id: str, role: str, content: str):
 # =========================
 # AI ENGINE
 # =========================
-def ask_gpt(user_message: str, user: dict) -> str:
+def ask_gpt(user_message, user):
 
     system_prompt = f"""
-你是「AI戰將教練」。
+你是「戰將教練 肆伍參平哥AI助理」。
+
+系統版本：{SYSTEM_VERSION}
 
 使用者狀態：
 - 階段：{user.get('stage')}
 - 週數：{user.get('current_week')}
 - 連續打卡：{user.get('streak_days')}
 
-規則：
-1. 一次只給一個行動
-2. 不講空話
-3. 要能立刻執行
-4. 幫助成交 / 帶人 / 複製
+【核心任務】
+- 幫助新人 90 天內晉升一星董事
+- 只給「一個可執行行動」
+- 不講理論、不做長篇分析
+- 所有內容要能複製、能成交、能帶人
+
+【風格】
+- 像戰略教練，不像客服
+- 直接、有壓迫感、有方向
 """
 
     try:
         response = client.responses.create(
             model="gpt-4o-mini",
             instructions=system_prompt,
-            input=user_message,
-            timeout=20
+            input=user_message[:800],
         )
-
         return response.output_text
 
     except Exception as e:
@@ -137,21 +134,22 @@ def callback():
 def handle_message(event):
 
     user_id = event.source.user_id
-    user_message = event.message.text[:800]  # 防爆 token / memory
+    user_message = event.message.text[:800]
 
+    print("SYSTEM VERSION:", SYSTEM_VERSION)
     print("USER ID:", user_id)
     print("MESSAGE:", user_message)
 
     # 1️⃣ user
     user = get_user(user_id)
 
-    # 2️⃣ log user msg
+    # 2️⃣ save user msg
     save_conversation(user_id, "user", user_message)
 
     # 3️⃣ AI reply
     reply = ask_gpt(user_message, user)
 
-    # 4️⃣ log AI msg
+    # 4️⃣ save AI msg
     save_conversation(user_id, "ai", reply)
 
     # 5️⃣ reply LINE
@@ -167,8 +165,7 @@ def handle_message(event):
 
 
 # =========================
-# RUN (Render)
+# RUN
 # =========================
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
