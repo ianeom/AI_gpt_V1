@@ -133,34 +133,16 @@ def callback():
 def handle_message(event):
 
     user_id = event.source.user_id
-    text = event.message.text
+    user_message = event.message.text
 
-    # 1️⃣ 取得/建立使用者
-    user = get_user(user_id)
+    print("USER ID:", user_id)
+    print("MESSAGE:", user_message)
 
-    # 2️⃣ 存對話
-    save_conversation(user_id, "user", text)
+    memory, full_memory = get_user_memory(user_id)
 
-    # 3️⃣ AI 回覆
-    reply = ask_gpt(text, user)
+    mode = ai_router(user_message)
 
-    # 4️⃣ 存 AI 回覆
-    save_conversation(user_id, "ai", reply)
-
-    # 5️⃣ 打卡觸發
-    if "打卡" in text or "完成" in text:
-        save_checkin(user_id, text)
-
-    # 6️⃣ 回傳 LINE
-    with ApiClient(line_config) as api_client:
-        line_bot_api = MessagingApi(api_client)
-
-        line_bot_api.reply_message(
-            ReplyMessageRequest(
-                reply_token=event.reply_token,
-                messages=[TextMessage(text=reply)]
-            )
-        )
+    print("🔥 MESSAGE TRIGGERED")
 
 
 # =========================
