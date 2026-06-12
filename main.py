@@ -175,17 +175,17 @@ def handle_message(event):
 
     mode = route_message(user_message)
 
-    if mode == "BUSINESS":
+if mode == "BUSINESS":
     pc_count = extract_pc_count(user_message)  # 可先簡化
     result = engine.quick_preview(pc_count)
     reply = f"""
-💰 商業試算結果
+    💰 商業試算結果
 
-PC數：{result['pc_count']}
-週收入：{result['weekly_income']}
-QDV：{result['qdv']}
-BV：{result['bv']}
-"""
+    PC數：{result['pc_count']}
+    週收入：{result['weekly_income']}
+    QDV：{result['qdv']}
+    BV：{result['bv']}
+    """
     
     # =========================
     # ⭐ 修正重點：只在第一次顯示 onboarding
