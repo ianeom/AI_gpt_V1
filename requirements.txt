@@ -2,3 +2,4 @@ flask
 gunicorn
 openai
 line-bot-sdk
+supabase
