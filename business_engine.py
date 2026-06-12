@@ -18,7 +18,6 @@ class BusinessEngine:
     def get_weekly_rule(self):
         return self.WEEKLY_RULES
 
-
     # =========================
     # 🧠 X39 基礎規格（不可變）
     # =========================
@@ -30,27 +29,21 @@ class BusinessEngine:
     # 💰 PC / PC+ 收益模型
     # =========================
     def pc_weekly_income(self, pc_count: int):
-        """
-        每位 PC / PC+ 每週固定收入
-        """
         return pc_count * 20  # USD / week
 
-
+    # =========================
+    # 📊 QDV / BV
+    # =========================
     def calc_qdv(self, pc_count: int):
         return pc_count * self.X39_QDV
 
-
     def calc_bv(self, pc_count: int):
         return pc_count * self.X39_BV
-
 
     # =========================
     # 📊 客戶介紹金（QDV 獎金）
     # =========================
     def referral_bonus(self, total_qdv: int):
-        """
-        嚴格 QDV 制，不得用美金亂算
-        """
 
         if total_qdv >= 1200:
             return total_qdv * 0.20
@@ -63,20 +56,13 @@ class BusinessEngine:
 
         return 0
 
-
     # =========================
     # ⚖️ 雙向獎金規則
     # =========================
     def dual_bonus(self, level: str, small_side_bv: int):
-        """
-        level:
-        - S1 / S2 = 一星 / 二星經理
-        - S3 = 三星經理
-        - D = 一星董事以上
-        """
 
         if level in ["S1", "S2"]:
-            return 0  # ❌ 完全禁止
+            return 0  # ❌ 禁止
 
         if level == "S3":
             return small_side_bv * 0.05
@@ -86,22 +72,20 @@ class BusinessEngine:
 
         return 0
 
-
     # =========================
     # 🧭 經理判定邏輯
     # =========================
     def is_two_star_manager(self, personal_qdv: int):
-        return personal_qdv >= 1500  # 20 PC+
-
+        return personal_qdv >= 1500  # 約 20 PC+
 
     def is_director(self, team_qdv: int):
         return team_qdv >= 5000
-
 
     # =========================
     # 📦 快速試算工具（給 AI 用）
     # =========================
     def quick_preview(self, pc_count: int):
+
         return {
             "pc_count": pc_count,
             "weekly_income": self.pc_weekly_income(pc_count),
