@@ -100,13 +100,28 @@ def ask_gpt(user_message, user):
 - 幫助成交、帶人、複製
 """
 
+   response = client.responses.create(
+    model="gpt-4o-mini",
+    instructions=system_prompt,
+    input=user_message,
+    timeout=20
+)
+
+try:
     response = client.responses.create(
-        model="gpt-5-mini",
+        model="gpt-4o-mini",
         instructions=system_prompt,
-        input=user_message
+        input=user_message,
+        timeout=20
     )
+    return response.output_text
+except Exception as e:
+    print("OPENAI ERROR:", e)
+    return "系統繁忙，請稍後再試"
 
     return response.output_text
+
+
 
 
 # =========================
@@ -134,6 +149,7 @@ def handle_message(event):
 
     user_id = event.source.user_id
     user_message = event.message.text
+    user_message = user_message[:800]
 
     print("USER ID:", user_id)
     print("MESSAGE:", user_message)
