@@ -1,12 +1,19 @@
+# ==============================================================================
+# 🚀 肆伍參團隊戰將複製系統 
+# 🏷️ 系統版本：v2.1.2-Build202606
+# 💡 核心精神：簡單、易學、可複製
+# 📅 結算機制：每週領獎金 (週薪制大盤)
+# ==============================================================================
+
 import os
+import json
+import re
 from flask import Flask, request, abort
 
 from openai import OpenAI
-from supabase import create_client, Client
-
-from business_engine import BusinessEngine
-
+from openai import types
 from linebot.v3 import WebhookHandler
+from linebot.v3.exceptions import InvalidSignatureError
 from linebot.v3.messaging import (
     Configuration,
     ApiClient,
@@ -16,237 +23,353 @@ from linebot.v3.messaging import (
 )
 from linebot.v3.webhooks import MessageEvent, TextMessageContent
 
-
-# =========================
-# INIT
-# =========================
 app = Flask(__name__)
-SYSTEM_VERSION = "v3"
 
-engine = BusinessEngine()
-
+# 環境變數設定
 LINE_ACCESS_TOKEN = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN")
 LINE_SECRET = os.environ.get("LINE_CHANNEL_SECRET")
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
-
+line_config = Configuration(access_token=LINE_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_SECRET)
-client = OpenAI(api_key=OPENAI_API_KEY)
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+# 初始化 Gemini Client
+gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 
-# =========================
-# HOME
-# =========================
-@app.route("/")
-def home():
-    return f"LINE AI 商業成交系統 {SYSTEM_VERSION} Running"
+# --- 🧠 核心邏輯：AI 語意引導與闖關解鎖大腦 ---
+def get_prompt_and_respond(user_id: str, user_message: str) -> str:
+    cleaned_msg = user_message.strip().replace(" ", "").replace("，", "").replace(",", "")
+    cleaned_msg_upper = user_message.strip().upper()
 
+    # ==========================================================
+    # 🔒 關卡收集階段（高情商放行）：只要偵測到名字與推薦人，直接發出選單
+    # ==========================================================
+    has_name = any(k in cleaned_msg for k in ["我是", "名字", "姓名", "叫我", "我是：", "名字："]) or len(cleaned_msg) >= 4
+    has_referrer = any(k in cleaned_msg for k in ["推薦人", "介紹人", "推薦", "老大是", "推薦：", "平哥"])
+    
+    if (has_name and has_referrer) and not any(k in cleaned_msg_upper for k in ["解鎖", "W", "第", "獎金", "加速器", "利潤"]):
+        return (
+            "🎉 【系統認證成功！】\n"
+            "🏷️ 系統版本：v2.1.2-Build202606\n\n"
+            "夥伴你好！資料已安全對接。歡迎加入肆伍參團隊通路裂變系統！\n"
+            "我是【金牌教練＿肆伍參平哥】的 AI 特助。從現在開始，你可以隨時跟我諮詢組織運作的心態、方法與技巧。\n\n"
+            "===SPLIT===\n"
+            "📢 【平哥教練親自叮嚀：系統對接紀律】\n"
+            "想是問題，做是答案！為了讓你在 3 個月內精準建廠、晉升一星董事，你可以直接回覆輸入以下「黃金密碼關鍵字」，立刻向我對接核心骨架：\n\n"
+            "👉 輸入【90天新人加速器】：解鎖起盤藍圖與最高指導原則\n"
+            "👉 輸入【優選客戶利潤】：看懂 PC/PC+ 永久被動收入、90天無風險全額退費保證與週薪結算\n"
+            "👉 輸入【推薦獎金】：了解新戰將 BP 尊爵套裝 PIB 與入會大紅包\n"
+            "👉 輸入【代數購貨獎金】：了解自動化大盤活躍壓縮自轉\n"
+            "👉 輸入【快速啟動獎金】：拿滿前 9 週週週加薪\n"
+            "👉 輸入【二星經理】：解鎖晉升黃金起步點\n"
+            "👉 輸入【一星董事】：挑戰一次爆發拿滿六大管道獎金\n\n"
+            "現在就挑選一個你想了解的主題輸入，我們頂峰相見！"
+        )
 
-# =========================
-# SUPABASE
-# =========================
-def get_user(line_user_id):
-    res = supabase.table("users").select("*").eq("line_user_id", line_user_id).execute()
+    # ==========================================================
+    # 🎯 系統直回：【90天新人加速器】起盤藍圖（全局鳥瞰大盤）
+    # ==========================================================
+    if cleaned_msg_upper in ["90天新人加速器", "90天新人加速器計畫", "起盤藍圖"]:
+        return (
+            "🚀 【90天新人加速器·最高指導原則】：\n"
+            "1. 快速篩選優選客戶（PC/PC+）\n"
+            "2. 複製二星經理\n"
+            "3. 目標一星董事\n\n"
+            "===SPLIT===\n"
+            "🎯 第一階段：【第1月·快速篩選 PC/PC+ 愛用池】\n"
+            "💡 核心：利用高價值資訊分享與 Threads 懸念經營，累積 10-20 個 PC+ 自動送貨愛用池。\n"
+            "👉 輸入【第1月】即可直接解鎖第 1-4 週詳細主題與必修任務。\n\n"
+            "===SPLIT===\n"
+            "🎯 第二階段：【第2月·複製二星經理（建幹部線）】\n"
+            "💡 核心：從 PC+ 觀察者中篩選種子戰將，協助其引爆組織，複製二星經理大盤。\n"
+            "🔒 權限防線：本階段任務已被鎖定。完成首月大考後，請向直屬教練領取通關密碼，並於視窗回覆【解鎖第二月+密碼】進行開通。\n\n"
+            "🎯 第三階段：【第3月·建廠插旗直衝一星董事】\n"
+            "💡 核心：不是你在賣，是別人在賣。分層管理、大場借力，全面引爆六大管道全方位獎金！\n"
+            "🔒 權限防線：本階段任務已被鎖定。完成二星經理複製後，請向平哥教練領取通關密碼，並於視窗回覆【解鎖第三月+密碼】進行開通。"
+        )
 
-    if not res.data:
-        user = {
-            "line_user_id": line_user_id,
-            "stage": "Starter",
-            "current_week": 1,
-            "streak_days": 0
-        }
-        supabase.table("users").insert(user).execute()
-        return user
+    # 🟢 第一階段：第 1 ~ 4 週
+    elif cleaned_msg_upper in ["第1月", "第一月"]:
+        return "📈 【🟢 第一階段：第1月·快速篩選 PC/PC+ 任務大盤】\n\n請輸入對應週次查看「每週必修任務」與「小型通關考核」：\n\n👉 輸入【W1】：解鎖第 1 週【定心定位與高價值破冰】\n👉 輸入【W2】：解鎖第 2 週【Threads 經營與 PC 方案切入】\n👉 輸入【W3】：解鎖第 3 週【一頁式工具與 90天滿意保證締結】\n👉 輸入【W4】：解鎖第 4 週【首月 PC+ 大收網與經理考核】\n\n⚠️ 紀律防線：本月【每週必修】主動諮詢直屬教練，並帶對話截圖進行覆盤！"
+    elif cleaned_msg_upper == "W1":
+        return (
+            "🎯 【第 1 週主題：定心定位與高價值破冰】\n\n"
+            "📚 【本週必修課】\n"
+            "1. 【定心 定位 定方向】訓練：確立創業者領袖心態。我們是高價值健康資訊的分享者，絕不低價推銷、不做試用盲測。\n"
+            "2. 【每週主動諮詢直屬教練】：週底主動找教練覆盤名單與破冰對話。\n\n"
+            "===SPLIT===\n"
+            "🔥 每日行動 SOP\n"
+            "- 盤點熟人、舊同事名單，每天新增 3-5 個高價值對話。\n"
+            "- 核心破冰話術：「我最近在跟資深專家對接一個全球獨家的光波科技健康大盤，不是賣東西。你有睡眠或精神困擾嗎？我發一份高價值科技解密報告給你看。」\n\n"
+            "🏆 小型通關考核\n"
+            "成功引引導 5 位名單看完科技解密報告。未達標者留級重修基礎高價值對話！"
+        )
+    elif cleaned_msg_upper == "W2":
+        return (
+            "🎯 【第 2 週主題：Threads 懸念經營與 PC 方案切入】\n\n"
+            "📚 【本週必修會議】\n"
+            "1. 參加【月初·光波小學堂】：熟練產品基礎物理原理，奠定高價值專業底氣。\n"
+            "2. 參加【每週·地區夜訓】：帶動核心體感名單進場感受系統大盤氛圍。\n\n"
+            "===SPLIT===\n"
+            "🔥 每日行動 SOP\n"
+            "- 每天發表 1 則 Threads 體驗型懸念內容（如：「第 3 天，幫夥伴對接專利光波科技，看著她睡眠變穩，這大盤市場真的太恐怖...」）。\n"
+            "- 從 Threads 留言與私訊中，快速篩選出有強烈健康需求的愛用者種子。\n\n"
+            "🏆 小型通關考核\n"
+            "Threads 帳號建立並成功發出 5 則高價值懸念貼文，且陌生私訊互動達 5 人以上！"
+        )
+    elif cleaned_msg_upper == "W3":
+        return (
+            "🎯 【第 3 週主題：一頁式工具與 90天滿意保證締結】\n\n"
+            "📚 【本週必修課】\n"
+            "1. 【工具說明能力培訓】：練熟如何用一頁式網頁工具，跟客戶優雅、專業地展示實驗科學邏輯與 PC/PC+ 自動送貨方案。\n"
+            "2. 【每週主動諮詢直屬教練】：向直屬教練演示自己切入 PC+ 方案的流暢度。\n\n"
+            "===SPLIT===\n"
+            "🔥 每日行動 SOP\n"
+            "- 嚴格執行 321 紀律（3 個新對話、2 則懸念內容、1 個一頁式導流），出示「90天無風險體驗保證」臨門一腳話術。\n"
+            "- 核心締結話術：「公司提供 90 天不問理由、沒有條件、不滿意全額退費的保證！你直接走官方 PC+ 自動送貨，完全零風險，身體會告訴你答案。」\n\n"
+            "🏆 小型通關考核\n"
+            "能對著直屬教練流暢完成一次「90天無風險退費保證」的 PC+ 締結話術演練考核。"
+        )
+    elif cleaned_msg_upper == "W4":
+        return (
+            "🎯 【第 4 週主題：首月 PC+ 大收網與經理考核】\n\n"
+            "📚 【本週必修會議】\n"
+            "1. 帶領手頭所有觀望中或想了解事業的愛用者，全面參與【商機 OPP 說明會】，借大場力量幫新人收單、看懂藍海趨勢。\n"
+            "2. 【每週主動諮詢直屬教練】：核對第一個月 PC/PC+ 累積數據，佈局下個月的二星經理種子。\n\n"
+            "===SPLIT===\n"
+            "🔥 每日行動 SOP\n"
+            "- 引導優質愛用者自行點擊官方連結，完成 PC+ 自動送貨計畫，死鎖終身黏著度。\n\n"
+            "🏆 第一月最終總結大考\n"
+            "1. 親推消費者大盤累積 10 個以上的 PC/PC+ 忠誠愛用者（解鎖 10% 客戶介紹金加碼）！\n"
+            "2. 本月底成功晉升「經理」位階，順利通過大考者，請帶對話數據向教練領取暗號，輸入開通第二階段！"
+        )
 
-    return res.data[0]
+    # 🟡 第二階段：攔截與密碼驗證防線（精準對齊：453BP）
+    elif "解鎖第二月" in cleaned_msg_upper or cleaned_msg_upper in ["第2月", "第二月", "W5", "W6", "W7", "W8"]:
+        if "453BP" in cleaned_msg_upper or cleaned_msg_upper == "解鎖第二月453BP":
+            if cleaned_msg_upper in ["W5", "W6", "W7", "W8"]:
+                pass 
+            else:
+                return "🔓 【密碼正確！第二階段已順利解鎖】\n\n恭喜你跨越首月防線！你已正式開通中盤幹部複製權限。\n\n👉 請輸入【第2月大盤】查看第 5-8 週詳細任務！"
+        else:
+            return "🔒 【權限攔截：尚未解除鎖定】\n\n平哥常說：『做大事業，靠的是簡單、易學、可複製。』\n第二階段為【複製二星經理】的核心幹部課，為了確保組織紀律，請先帶領 10 個 PC+ 數據與直屬教練進行首月覆盤大考。通過後即可領取開通密碼！\n\n📝 密碼取得後請輸入：『解鎖第二月+您的通關暗號』"
 
+    # 🟡 第二階段完全體任務內容
+    elif cleaned_msg_upper in ["第2月大盤", "第二月大盤"]:
+        return "💰 【🟡 第二階段：第2月·複製二星經理 任務大盤】\n\n請輸入對應週次查看必修與考核：\n\n👉 輸入【W5】：解鎖第 5 週【幹部篩選與二星戰略對接】\n👉 輸入【W6】：解鎖第 6 週【黃金 ABC 法則與三方群收單】\n👉 輸入【W7】：解鎖第 7 週【新夥伴入會與 BP 套裝啟動】\n👉 輸入【W8】：解鎖第 8 週【中盤複製與二星經理誕生】\n\n⚠️ 幹部紀律：自己必須維持 110 PV 活躍，全神貫注抓出 2 個核心幫他衝 1500 QDV！"
+    elif cleaned_msg_upper == "W5":
+        return (
+            "🎯 【第 5 週主題：幹部篩選與二星戰略對接】\n\n"
+            "📚 【本週必修課】\n"
+            "1. 【領袖轉化培訓】：拋出商業彩蛋，從現有的 10-20 個愛用 PC+ 當中，篩選出 2-3 位想建立被動收入的種子幹部。\n"
+            "2. 【每週主動諮詢直屬教練】：帶著名單與教練對接，幫底下的種子量身規劃「二星經理一條線」戰術。\n\n"
+            "===SPLIT===\n"
+            "🔥 每日行動 SOP\n"
+            "- 核心轉化話術：「你用得這麼好，有沒有看懂這個全球無法被複製的藍海市場？我這條線要全力打底，帶 2 個核心衝二星經理，你有興趣卡位嗎？」\n\n"
+            "🏆 小型通關考核\n"
+            "成功與至少 2 位優秀愛用者完成「轉化 BP 事業夥伴」的深度一對一對接。"
+        )
+    elif cleaned_msg_upper == "W6":
+        return (
+            "🎯 【第 6 週主題：黃金 ABC 法則與三方群收單】\n\n"
+            "📚 【本週必修會議與課】\n"
+            "1. 【ABC 法則借力培訓】：練熟如何當一個完美的「B 角色」，推崇平哥或直屬 A教練，利用實體夜訓或線上三方群幫你的新人幹部收單。\n"
+            "2. 參加【每月·經理一日培訓】：肉身進場，學習高階中盤控兵技術。\n\n"
+            "===SPLIT===\n"
+            "🔥 每日行動 SOP\n"
+            "- 協助你的下線幹部建立三方對話群，由你或推崇 A 教練進群，幫下線的新人解惑、進行 ABC 借力收單。\n\n"
+            "🏆 小型通關考核\n"
+            "配合教練或親自作為 A 角色，在實戰中完成至少 3 次無瑕疵的 ABC 借力三方群收單演練。"
+        )
+    elif cleaned_msg_upper == "W7":
+        return (
+            "🎯 【第 7 週主題：新夥伴入會與 BP 套裝啟動】\n\n"
+            "📚 【本週必修課】\n"
+            "1. 【套裝引導培訓】：練熟入會套裝（PIB）的拆解邏輯，引導新戰將以「尊爵套裝」進場卡位，現領 $405 美元大紅包，瞬間引爆代數獎金！\n"
+            "2. 【每週主動諮詢直屬教練】：核對下線幹部的總積分（QDV），精準控盤。\n\n"
+            "===SPLIT===\n"
+            "🔥 每日行動 SOP\n"
+            "- 引導新夥伴完成 BP 品牌夥伴入會流程，並強迫新夥伴當天直接對接【90天新人加速器】系統，開始跑 W1 流程。\n"
+            "- 核心話術：「做大事業靠的是複製，尊爵套裝直接幫你卡滿點數，接下來兩個月系統自動供養你 110BV，全神貫注跟著系統跑！」\n\n"
+            "🏆 小型通關考核\n"
+            "本週成功協助下線幹部啟動至少 2 筆 BP 夥伴入會套裝。"
+        )
+    elif cleaned_msg_upper == "W8":
+        return (
+            "🎯 【第 8 週主題：中盤複製與二星經理誕生】\n\n"
+            "📚 【本週必修會議】\n"
+            "1. 全面兵臨【每週·地區夜訓】：帶領你和你下線的所有 BP 戰將集體肉身進場，炸開新人的格局。\n"
+            "2. 【每週主動諮詢直屬教練】：進行第二個月總結，核算是否完美達成二星經理複製大盤。\n\n"
+            "===SPLIT===\n"
+            "🔥 每日行動 SOP\n"
+            "- 緊盯兩條核心線，確保下線夥伴連續 31 天內親推線總積分（QDV）衝破 1,500 分，且下週起開始追尾被動大收益。\n\n"
+            "🏆 第二月最終總結大考\n"
+            "1. 自己個人積分穩固在 110 PV 以上。\n"
+            "2. 成功複製出 2 位「二星經理」核心幹部，完成二星大盤複製者，請向平哥教練領取終極暗號，進軍一星董事！"
+        )
 
-def update_user_stage(line_user_id, stage):
-    supabase.table("users").update(
-        {"stage": stage}
-    ).eq("line_user_id", line_user_id).execute()
+    # 🔵 第三階段：攔截與密碼驗證防線（精準對齊：453neo）
+    elif "解鎖第三月" in cleaned_msg_upper or cleaned_msg_upper in ["第3月", "第三月", "W9", "W10", "W11", "W12"]:
+        if "453NEO" in cleaned_msg_upper or cleaned_msg_upper == "解鎖第三月453NEO":
+            if cleaned_msg_upper in ["W9", "W10", "W11", "W12"]:
+                pass 
+            else:
+                return "🔓 【密碼正確！第三階段終極防線已解鎖】\n\n恭喜你殺入核心核心！你已正式進入平哥決策圈，準備啟動高階建廠自轉大盤。\n\n👉 請輸入【第3月大盤】查看第 9-12 週詳細任務！"
+        else:
+            return "🔒 【權限攔截：尚未解除核心鎖定】\n\n平哥常說：『做大事業，靠的是簡單、易學、可複製。』\n第三階段為【建廠插旗直衝一星董事】的領袖戰略課。請先帶領 2 條核心二星經理線的覆盤數據找平哥教練進行終極考核。通過後即可當面領取終極暗號密碼！\n\n📝 密碼取得後請輸入：『解鎖第三月+您的通關暗號』"
 
+    # 🔵 第三階段完全體任務內容
+    elif cleaned_msg_upper in ["第3月大盤", "第三月大盤"]:
+        return "🌱 【🔵 第三階段：第3月·建廠插旗直衝一星董事 任務大盤】\n\n請輸入對應週次查看必修與考核：\n\n👉 輸入【W9】：解鎖第 9 週【多核心矩陣與大盤分層管理】\n👉 輸入【W10】：解鎖第 10 週【全團隊 Threads 大引流與裂變】\n👉 輸入【W11】：解鎖第 11 週【大場借力與一星董事總攻】\n👉 輸入【W12】：解鎖第 12 週【插旗一星董事與系統全面自轉】\n\n⚠️ 領袖鐵律：不是你在賣，是別人在賣！用系統帶兵，全面拿滿六大管道全方位獎金！"
+    elif cleaned_msg_upper == "W9":
+        return (
+            "🎯 【第 9 週主題：多核心矩陣與大盤分層管理】\n\n"
+            "📚 【本週必修課】\n"
+            "1. 【大盤分層管理培訓】：停止凡事親力親為。學習如何放手讓底下的二星經理去帶他們自己的三方群，你退居二線進行數據控盤。\n"
+            "2. 【每週主動諮詢直屬教練】：核對左右兩邊雙向通路的 BV 積分，佈局董事線。\n\n"
+            "===SPLIT===\n"
+            "🔥 每日行動 SOP\n"
+            "- 每天只對接底下的核心幹部，檢查他們的「321紀律」與 PC+ 續訂率，確保組織健康造血。\n\n"
+            "🏆 小型通關考核\n"
+            "底下的核心幹部群能獨立運作小體驗群，且每日打卡率維持在 80% 以上。"
+        )
+    elif cleaned_msg_upper == "W10":
+        return (
+            "🎯 【第 10 週主題：全團隊 Threads 大引流與裂變】\n\n"
+            "📚 【本週必修會議】\n"
+            "1. 舉辦【團隊 Threads 社群商務聯網作戰】：集結團隊所有幹部，在 Threads 上形成矩陣式發文、互相推崇、互相導流，將陌生流量池放到最大。\n\n"
+            "===SPLIT===\n"
+            "🔥 每日行動 SOP\n"
+            "- 指導新夥伴複製你的 Threads 成功懸念模型，利用「90天無風險保證」進行全網大篩選，讓陌生流量自動源源不絕湧入系統。\n\n"
+            "🏆 小型通關考核\n"
+            "全團隊當週因 Threads 矩陣引流，新增填寫一頁式問卷或諮詢人數達 30 人以上！"
+        )
+    elif cleaned_msg_upper == "W11":
+        return (
+            "🎯 【第 11 週主題：大場借力與一星董事總攻】\n\n"
+            "📚 【本週必修課】\n"
+            "1. 【大場借力與締結閉環】：全面鎖定月底的大型商機 OPP 與晉升大會，啟動全組織總動員，將所有觀望中的高階名單全部推進大場。\n"
+            "2. 【每週主動諮詢直屬教練】：與平哥教練親自對帳，進行一星董事晉升的最後點數微調與排線佈局。\n\n"
+            "===SPLIT===\n"
+            "🔥 每日行動 SOP\n"
+            "- 瘋狂借力、推崇大場 A 角色，協助手頭所有卡關的夥伴進行最後的套裝締結，將分數推到最高峰。\n\n"
+            "🏆 小型通關考核\n"
+            "成功帶領至少 10 位夥伴/準夥伴實體進場參與總攻大會！"
+        )
+    elif cleaned_msg_upper == "W12":
+        return (
+            "🎯 【第 12 週主題：插旗一星董事與系統全面自轉】\n\n"
+            "📚 【本週必修會議】\n"
+            "1. 榮耀登上【晉升大會舞台】：正式達成一星董事，上台接受表揚，建立你個人的強大 Threads 領袖 IP！\n"
+            "2. 【與平哥教練策略覆盤】：進入平哥核心決策圈，佈局下一個季度的千人大盤自轉戰略。\n\n"
+            "===SPLIT===\n"
+            "🔥 每日行動 SOP\n"
+            "- 暢快拿滿銷售、PIB、代數、雙向、輔導、以及首次達成的 $500 美元突破晉升大紅包！\n"
+            "- 把這套「AI特助戰將複製系統」完整傳承給底下新誕生的經理，啟動下一輪自轉。\n\n"
+            "🏆 第三月最終總結大考\n"
+            "1. 左右兩邊核心組織完全穩固，當月業績強勢衝破一星董事防線！\n"
+            "2. 成功解鎖被動收入大盤，實現『不是你在賣，是別人在賣』的終極通路裂變自轉！"
+        )
 
-def save_conversation(line_user_id, role, content):
-    supabase.table("conversations").insert({
-        "line_user_id": line_user_id,
-        "role": role,
-        "content": content
-    }).execute()
+    # ==========================================================
+    # 🧠 AI 運作端：大腦核心提示詞（校準 2.0 鋼鐵公式與週薪制發放）
+    # ==========================================================
+    system_instruction = """
+你現在是【金牌教練＿肆伍參平哥】的專屬 AI 特助（戰將複製系統）。
+系統版本：v2.1.2-Build202606
+平哥是擁有 20 年資深通路高手實戰經驗、帶領 200 人團隊的高階商業領袖。
+你的任務：引引導新人「三個月內晉升一星董事」，進入平哥的核心決策圈！
 
+【🚀 90天新人加速器·最高指導原則（雙軌快篩最優戰略）】
+1. 快速篩選優選客戶（W1~W2）：用高價值健康分享與90天無風險保證，快速建立PC/PC+愛用大盤池。一包X39有77 QDV，親推所有消費者的QV可100%算入夥伴的QDV中。前兩週累積20個PC+（1540 QDV）直接把自己頂上「二星經理」實付身份！
+2. 複製二星經理（W3~W9）：此時身份為二星經理，引導優質PC+轉化或直接推薦新戰將卡位「BP尊爵套裝」，在享受現領$405美元PIB大紅包的同時，因為二星身份防線，可「頂格」拿滿週週$50美元的【快速啟動獎金】！
+3. 目標一星董事：當團隊複製出多個二星經理、左右雙向通路穩固時，全力推動下線一起晉升，解鎖全方位六大管道獎金，建廠插旗成功！
 
-# =========================
-# ONBOARDING
-# =========================
-def new_user_onboarding():
-    return (
-        "🚀 【90天新人加速器·最高指導原則】\n"
-        "1. 快速篩選優選客戶（PC+）\n"
-        "2. 複製二星經理\n"
-        "3. 目標一星董事\n\n"
-        "===SPLIT===\n"
-        "🎯 第一階段：【第1月·PC+ 愛用池】\n"
-        "👉 輸入【第1月】開始\n\n"
-        "===SPLIT===\n"
-        "🎯 第二階段：【第2月·複製二星經理】\n"
-        "🔒 輸入【解鎖第二月+密碼】\n\n"
-        "🎯 第三階段：【第3月·一星董事】\n"
-        "🔒 輸入【解鎖第三月+密碼】"
-    )
+【📅 2.0 規章：週薪制發放鐵律】
+必須讓夥伴深刻明白，本系統所有獎金皆為【每週領獎金（週薪制）】：
+- 每週結算期：台灣時間每週一下午 1:00 開始，計算至下週一中午 12:59 截止。
+- 當週內不論是 PC/PC+ 會員自動送貨扣款成功、新 BP 夥伴購買套裝（PIB），點數與現金利潤一律在當週一截止結算，並於「下一個禮拜的週四或週五」直接以美元發放至電子錢包。週週叮咚、秒速現領！
 
+【⚠️ 2.0 客戶利潤與介紹金精準公式（AI 必須死守的數學計算）】
+當用戶詢問關於客戶收益預估時，必須嚴格執行以下計算法，絕不允許自己發明數字：
+1. 一包旗艦貼片 X39 規格：會員價 = $99.95 美元、客戶積分 (QDV) = 77 分、雙軌組織積分 (BV) = 43 分。
+2. 優選客戶利潤：每位 PC/PC+ 購買一包 X39，推薦人固定「每週領」每包 $20 美元。
+3. 客戶介紹金：累計所有客戶的總 QDV（人數 x 77 QDV），對照 31天滾動門檻直接乘以「總 QDV 分數」，絕不用美金金額計算：
+   - 總 QDV 達 300 - 599 分 ➡️ 總 QDV x 5% = 介紹金美元
+   - 總 QDV 達 600 - 1,199 分 ➡️ 總 QDV x 10% = 介紹金美元
+   - 總 QDV 達 1,200 分以上 ➡️ 總 QDV x 20% = 介紹金美元
 
-# =========================
-# ROUTER
-# =========================
-def route_message(msg: str):
+【⚠️ 2.0 雙向獎金（小邊直乘位階防線）】
+必須鐵面無私對齊規章：
+- 一星經理 / 二星經理 ➡️ ❌ 雙向獎金為 0%（完全沒有，點數在後台安全儲存保留不歸零）。
+- 三星經理 ➡️ 解鎖啟動！小邊總 BV × 5% = 雙向獎金美元。
+- 一星董事（含以上頂格防線） ➡️ 頂格爆發！小邊總 BV × 7% = 雙向獎金美元。
+- 大邊剩餘點數安全保留，下週繼續直乘。
 
-    msg = msg.strip()
+【說話風格與領袖人格】
+- 充滿熱情、正向、極具感染力。講話絕不官腔，要像個有智慧、有格局的兄長。
+- 條理清晰、切中要害。一律使用繁體中文回覆。
+- 灌輸夥伴「複製倍增」與「通路裂變」的驚人威力，讓他們明白真正頂尖的通路高手做大事業，靠的是「簡單、易學、可複製」的自轉系統。
 
-    if any(w in msg for w in ["收入", "賺多少", "QDV", "BV", "獎金"]):
-        return "BUSINESS"
-
-    if msg in ["第1月", "W1", "W2", "W3", "W4"]:
-        return "FLOW_L1"
-
-    if "解鎖第二月" in msg:
-        return "UNLOCK_L2"
-
-    if msg in ["W5", "W6", "W7", "W8"]:
-        return "FLOW_L2"
-
-    return "AI"
-
-
-# =========================
-# BUSINESS ENGINE RESPONSE
-# =========================
-def business_reply(user_message):
-
-    pc_count = engine.extract_pc_count(user_message)
-
-    qdv = engine.calc_qdv(pc_count)
-    bv = engine.calc_bv(pc_count)
-    weekly = engine.weekly_payout(pc_count)
-
-    return f"""
-💰 商業試算結果
-
-PC數：{pc_count}
-QDV：{qdv}
-BV：{bv}
-週收入：約 ${weekly} USD
-"""
-
-
-# =========================
-# AI ENGINE
-# =========================
-def ask_ai(user_message, user):
-
-    system_prompt = f"""
-你是【AI戰將教練 v3】
-
-系統版本：{SYSTEM_VERSION}
-
-使用者：
-- stage: {user.get("stage")}
-- week: {user.get("current_week")}
-
-規則：
-1. 一次一個行動
-2. 不講大道理
-3. 要可執行
-4. 繁體中文
+【結尾紀律】
+始終貫徹平哥核心精神（只有次數 沒有技術 / 每天進步一點點 一定會看到甜美果實 / 想是問題 做是答案 輸在猶豫 贏在行動 / 持續做對的事 / 養成穩定的工作習慣 / 站在風口上豬也會飛），靈活挑選，絕不重覆。
 """
 
     try:
-        res = client.responses.create(
-            model="gpt-4o-mini",
-            instructions=system_prompt,
-            input=user_message[:800]
+        response = gemini_client.models.generate_content(
+            model='gpt-4o-mini',
+            contents=user_message,
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                temperature=0.7
+            )
         )
-        return res.output_text.strip()
-
+        return response.text
     except Exception as e:
-        print("OPENAI ERROR:", e)
-        return "先找3個有健康需求的人。"
+        print(f"Gemini API 發生錯誤: {e}")
+        return "對不起，我剛剛大腦稍微斷線了，請再試一次！"
 
-
-# =========================
-# WEBHOOK
-# =========================
-@app.route("/callback", methods=["POST"])
+# --- LINE Webhook 接收端點 ---
+@app.route("/callback", methods=['POST'])
 def callback():
+    signature = request.headers['X-Line-Signature']
     body = request.get_data(as_text=True)
-    signature = request.headers.get("X-Line-Signature")
 
     try:
         handler.handle(body, signature)
-    except Exception as e:
-        print("LINE ERROR:", e)
+    except InvalidSignatureError:
         abort(400)
 
-    return "OK"
+    return 'OK'
 
-
-# =========================
-# HANDLER
-# =========================
+# --- 🎯 智慧切片與分批發送處理機制 ---
 @handler.add(MessageEvent, message=TextMessageContent)
 def handle_message(event):
+    user_id = event.source.user_id  
+    user_message = event.message.text
+    
+    raw_reply = get_prompt_and_respond(user_id, user_message)
 
-    user_id = event.source.user_id
-    msg = event.message.text[:800]
-
-    print("SYSTEM:", SYSTEM_VERSION)
-    print("USER:", user_id)
-    print("MSG:", msg)
-
-    user = get_user(user_id)
-
-    save_conversation(user_id, "user", msg)
-
-    mode = route_message(msg)
-
-    # =========================
-    # FLOW
-    # =========================
-    if mode == "BUSINESS":
-        reply = business_reply(msg)
-
-    elif mode == "FLOW_L1":
-        reply = "🚀 輸入【第1月】開始任務"
-
-    elif mode == "UNLOCK_L2":
-        reply = "🔓 第二階段已解鎖"
-
+    if "===SPLIT===" in raw_reply:
+        messages_text = raw_reply.split("===SPLIT===")
     else:
-        # onboarding only once
-        if user.get("stage") == "Starter" and msg.lower() in ["hi", "哈囉", "你好", "start"]:
-            reply = new_user_onboarding()
-            update_user_stage(user_id, "Active")
+        parts = re.split(r'\n(?=\d\.\s|【|👉|📢)', raw_reply)
+        if len(parts) > 1:
+            messages_text = parts
         else:
-            reply = ask_ai(msg, user)
+            messages_text = [raw_reply]
 
-    save_conversation(user_id, "ai", reply)
+    final_texts = [t.strip() for t in messages_text if t.strip()][:3]
+    line_messages = [TextMessage(text=msg) for msg in final_texts]
 
-    # LINE reply
-    with ApiClient(Configuration(access_token=LINE_ACCESS_TOKEN)) as api_client:
+    with ApiClient(line_config) as api_client:
         line_bot_api = MessagingApi(api_client)
-
-        line_bot_api.reply_message(
+        line_bot_api.reply_message_with_http_info(
             ReplyMessageRequest(
                 reply_token=event.reply_token,
-                messages=[TextMessage(text=reply)]
+                messages=line_messages  
             )
         )
 
-
-# =========================
-# RUN
-# =========================
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    app.run(port=5000)
