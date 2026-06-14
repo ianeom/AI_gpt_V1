@@ -350,7 +350,7 @@ def get_prompt_and_respond(user_id: str, user_message: str) -> str:
 
     try:
         # 優化：Temperature 調低到 0.1 爆發極限速度，並且更嚴謹不胡說
-        response = openai_client.chat.com. completions.create(
+        response = openai_client.chat.com.completions.create(
             model='gpt-4o-mini',
             messages=[
                 {"role": "system", "content": system_instruction},
