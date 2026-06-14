@@ -104,7 +104,7 @@ def get_prompt_and_respond(user_id: str, user_message: str) -> str:
     # ==========================================================
     # 🎯 系統直回：【90天新人加速器】起盤藍圖（全局鳥瞰大盤）
     # ==========================================================
-    if cleaned_msg_upper in ["90天新人加速器", "90天新人",  "新人",  "90天新人加速器計畫", "起盤藍圖"]:
+    if cleaned_msg_upper in ["90天新人加速器", "90天新人加速器計畫", "起盤藍圖"]:
         return (
             "🚀 【90天新人加速器·最高指導原則】：\n"
             "1. 快速篩選優選客戶（PC/PC+）\n"
@@ -196,4 +196,244 @@ def get_prompt_and_respond(user_id: str, user_message: str) -> str:
         return (
             "🎯 【第 5 週主題：幹部篩選與二星戰略對接】\n\n"
             "📚 【本週必修課】\n"
-            "1. 【領袖轉化培訓】：拋出商業彩蛋，從現有的 10-20 個愛
+            "1. 【領袖轉化培訓】：拋出商業彩蛋，從現有的 10-20 個愛用 PC+ 當中，篩選出 2-3 位想建立被動收入的種子幹部。\n"
+            "2. 【每週主動諮詢直屬教練】：帶著名單與教練對接，幫底下的種子量身規劃「二星經理一條線」戰術。\n\n"
+            "===SPLIT===\n"
+            "🔥 每日行動 SOP\n"
+            "- 核心轉化話術：「你用得這麼好，有沒有看懂這個全球無法被複製的藍海市場？我這條線要全力打底，帶 2 個核心衝二星經理，你有興趣卡位嗎？」\n\n"
+            "🏆 小型通關考核\n"
+            "成功與至少 2 位優秀愛用者完成「轉化 BP 事業夥伴」的深度一對一對接。"
+        )
+    elif cleaned_msg_upper == "W6":
+        return (
+            "🎯 【第 6 週主題：黃金 ABC 法則與三方群收單】\n\n"
+            "📚 【本週必修會議與課】\n"
+            "1. 【ABC 法則借力培訓】：練熟如何當一個完美的「B 角色」，推崇平哥或直屬 A教練，利用實體夜訓或線上三方群幫你的新人幹部收單。\n"
+            "2. 參加【每月·經理一日培訓】：肉身進場，學習高階中盤控兵技術。\n\n"
+            "===SPLIT===\n"
+            "🔥 每日行動 SOP\n"
+            "- 協助你的下線幹部建立三方對話群，由你或推崇 A 教練進群，幫下線的新人解惑、進行 ABC 借力收單。\n\n"
+            "🏆 小型通關考核\n"
+            "配合教練或親自作為 A 角色，在實戰中完成至少 3 次無瑕疵的 ABC 借力三方群收單演練。"
+        )
+    elif cleaned_msg_upper == "W7":
+        return (
+            "🎯 【第 7 週主題：新夥伴入會與 BP 套裝啟動】\n\n"
+            "📚 【本週必修課】\n"
+            "1. 【套裝引導培訓】：練熟入會套裝（PIB）的拆解邏輯，引導新戰將以「尊爵套裝」進場卡位，現領 $405 美元大紅包，瞬間引爆代數獎金！\n"
+            "2. 【每週主動諮詢直屬教練】：核對下線幹部的總積分（QDV），精準控盤。\n\n"
+            "===SPLIT===\n"
+            "🔥 每日行動 SOP\n"
+            "- 引導新夥伴完成 BP 品牌夥伴入會流程，並強迫新夥伴當天直接對接【90天新人加速器】系統，開始跑 W1 流程。\n"
+            "- 核心話術：「做大事業靠的是複製，尊爵套裝直接幫你卡滿點數，接下來兩個月系統自動供養你 110BV，全神貫注跟著系統跑！」\n\n"
+            "🏆 小型通關考核\n"
+            "本週成功協助下線幹部啟動至少 2 筆 BP 夥伴入會套裝。"
+        )
+    elif cleaned_msg_upper == "W8":
+        return (
+            "🎯 【第 8 週主題：中盤複製與二星經理誕生】\n\n"
+            "📚 【本週必修會議】\n"
+            "1. 全面兵臨【每週·地區夜訓】：帶領你和你下線的所有 BP 戰將集體肉身進場，炸開新人的格局。\n"
+            "2. 【每週主動諮詢直屬教練】：進行第二個月總結，核算是否完美達成二星經理複製大盤。\n\n"
+            "===SPLIT===\n"
+            "🔥 每日行動 SOP\n"
+            "- 緊盯兩條核心線，確保下線夥伴連續 31 天內親推線總積分（QDV）衝破 1,500 分，且下週起開始追尾被動大收益。\n\n"
+            "🏆 第二月最終總決大考\n"
+            "1. 自己個人積分穩固在 110 PV 以上。\n"
+            "2. 成功複製出 2 位「二星經理」核心幹部，完成二星大盤複製者，請向平哥教練領取終極暗號，進軍一星董事！"
+        )
+
+    # 🔵 第三階段：攔截與密碼驗證防線（精準對齊：453neo）
+    elif "解鎖第三月" in cleaned_msg_upper or cleaned_msg_upper in ["第3月", "第三月", "W9", "W10", "W11", "W12"]:
+        if "453NEO" in cleaned_msg_upper or cleaned_msg_upper == "解鎖第三月453NEO":
+            if cleaned_msg_upper in ["W9", "W10", "W11", "W12"]:
+                pass 
+            else:
+                return "🔓 【密碼正確！第三階段終極防線已解鎖】\n\n恭喜你殺入核心核心！你已正式進入平哥決策圈，準備啟動高階建廠自轉大盤。\n\n👉 請輸入【第3月大盤】查看第 9-12 週詳細任務！"
+        else:
+            return "🔒 【權限攔截：尚未解除核心鎖定】\n\n平哥常說：『做大事業，靠的是簡單、易學、可複製。』\n第三階段為【建廠插旗直衝一星董事】的領袖戰略課。請先帶領 2 條核心二星經理線的覆盤數據找平哥教練進行終極考核。通過後即可當面領取終極暗號密碼！\n\n📝 密碼取得後請輸入：『解鎖第三月+您的通關暗號』"
+
+    # 🔵 第三階段完全體任務內容
+    elif cleaned_msg_upper in ["第3月大盤", "第三月大盤"]:
+        return "🌱 【🔵 第三階段：第3月·建廠插旗直衝一星董事 任務大盤】\n\n請輸入對應週次查看必修與考核：\n\n👉 輸入【W9】：解鎖第 9 週【多核心矩陣與大盤分層管理】\n👉 輸入【W10】：解鎖第 10 週【全團隊 Threads 大引流與裂變】\n👉 輸入【W11】：解鎖第 11 週【大場借力與一星董事總攻】\n👉 輸入【W12】：解鎖第 12 週【插旗一星董事與系統全面自轉】\n\n⚠️ 領袖鐵律：不是你在賣，是別人在賣！用系統帶兵，全面拿滿六大管道全方位獎金！"
+    elif cleaned_msg_upper == "W9":
+        return (
+            "🎯 【第 9 週主題：多核心矩陣與大盤分層管理】\n\n"
+            "📚 【本週必修課】\n"
+            "1. 【大盤分層管理培訓】：停止凡事親力親為。學習如何放手讓底下的二星經理去帶他們自己的三方群，你退居二線進行數據控盤。\n"
+            "2. 【每週主動諮詢直屬教練】：核對左右兩邊雙向通路的 BV 積分，佈局董事線。\n\n"
+            "===SPLIT===\n"
+            "🔥 每日行動 SOP\n"
+            "- 每天只對接底下的核心幹部，檢查他們的「321紀律」與 PC+ 續訂率，確保組織健康造血。\n\n"
+            "🏆 小型通關考核\n"
+            "底下的核心幹部群能獨立運作小體驗群，且每日打卡率維持在 80% 以上。"
+        )
+    elif cleaned_msg_upper == "W10":
+        return (
+            "🎯 【第 10 週主題：全團隊 Threads 大引流與裂變】\n\n"
+            "📚 【本週必修會議】\n"
+            "1. 舉辦【團隊 Threads 社群商務聯網作戰】：集結團隊所有幹部，在 Threads 上形成矩陣式發文、互相推崇、互相導流，將陌生流量池放到最大。\n\n"
+            "===SPLIT===\n"
+            "🔥 每日行動 SOP\n"
+            "- 指導新夥伴複製你的 Threads 成功懸念模型，利用「90天無風險保證」進行全網大篩選，讓陌生流量自動源源不絕湧入系統。\n"
+            "- 核心話術：「公司提供 90 天不問理由、沒有條件、不滿意全額退費的保證！你直接走官方 PC+ 自動送貨，完全零風險，身體會告訴你答案。」\n\n"
+            "🏆 小型通關考核\n"
+            "全團隊當週因 Threads 矩陣引流，新增填寫一頁式問卷或諮詢人數達 30 人以上！"
+        )
+    elif cleaned_msg_upper == "W11":
+        return (
+            "🎯 【第 11 週主題：大場借力與一星董事總攻】\n\n"
+            "📚 【本週必修課】\n"
+            "1. 【大場借力與締結閉環】：全面鎖定月底的大型商機 OPP 與晉升大會，啟動全組織總動員，將所有觀望中的高階名單全部推進大場。\n"
+            "2. 【每週主動諮詢直屬教練】：與平哥教練親自對帳，進行一星董事晉升的最後點數微調與排線佈局。\n\n"
+            "===SPLIT===\n"
+            "🔥 每日行動 SOP\n"
+            "- 瘋狂借力、推崇大場 A 角色，協助手頭所有卡關的夥伴進行最後的套裝締結，將分數推到最高峰。\n\n"
+            "🏆 小型通關考核\n"
+            "成功帶領至少 10 位夥伴/準夥伴實體進場參與總攻大會！"
+        )
+    elif cleaned_msg_upper == "W12":
+        return (
+            "🎯 【第 12 週主題：插旗一星董事與系統全面自轉】\n\n"
+            "📚 【本週必修會議】\n"
+            "1. 榮耀登上【晉升大會舞台】：正式達成一星董事，上台接受表揚，建立你個人的強大 Threads 領袖 IP！\n"
+            "2. 【與平哥教練策略覆盤】：進入平哥核心決策圈，佈局下一個季度的千人大盤自轉戰略。\n\n"
+            "===SPLIT===\n"
+            "🔥 每日行動 SOP\n"
+            "- 暢快拿滿銷售、PIB、代數、雙向、輔導、以及首次達成的 $500 美元突破晉升大紅包！\n"
+            "- 把這套「AI特助戰將複製系統」完整傳承給底下新誕生的經理，啟動下一輪自轉。\n\n"
+            "🏆 第三月最終總結大考\n"
+            "1. 左右兩邊核心組織完全穩固，當月業績強勢衝破一星董事防線！\n"
+            "2. 成功解鎖被動收入大盤，實現『不是你在賣，是別人在賣』的終極通路裂變自轉！"
+        )
+
+    # ==========================================================
+    # 🧠 AI 運作端：大腦核心提示詞 (精簡優化，降低干擾)
+    # ==========================================================
+    system_instruction = (
+        "你現在是【金牌教練＿肆伍參平哥】的專屬 AI 特助（戰將複製系統）。\n"
+        "系統版本：v2.1.2-Build202606\n"
+        "平哥是擁有 20 年資深通路高手實戰經驗、帶領 200 人團隊的高階商業領袖。\n"
+        "你的任務：引導新人「三個月內晉升一星董事」，進入平哥的核心決策圈！\n\n"
+        "【📅 週薪制發放鐵律】\n"
+        "必須讓夥伴深刻明白，本系統所有獎金皆為【每週領獎金（週薪制）】\n"
+        "- 每週結算期：台灣時間每週一下午 1:00 開始至下週一中午 12:59 截止。\n"
+        "- 當週點數與利潤一律在當週一截止結算，並於「隔週的週四或週五」發放至電子錢包。週週叮咚、秒速現領！\n\n"
+        "【⚠️ 雙向獎金防線】\n"
+        "- 一星經理 / 二星經理 ➡️ ❌ 雙向獎金為 0%（點數安全儲存不歸零）。\n"
+        "- 三星經理 ➡️ 小邊總 BV × 5% = 雙向獎金美元。\n"
+        "- 一星董事（頂格防線） ➡️ 小邊總 BV × 7% = 雙向獎金美元。\n\n"
+        "【說話風格與領袖人格】\n"
+        "- 充滿熱情、正向、極具感染力。講話要像個有智慧、有格局的兄長，使用繁體中文回覆。\n"
+        "【結尾紀律】\n"
+        "隨機挑選一句平哥的核心精神（只有次數 沒有技術 / 每天進步一點點 一定會看到甜美果實 / 想是問題 做是答案）作為結尾。"
+    )
+
+    # 定義計算機工具交給 OpenAI
+    tools = [{
+        "type": "function",
+        "function": {
+            "name": "calculate_pc_bonus",
+            "description": "當用戶詢問有多少消費者、幾人買X39、或是想要幫夥伴、團隊預估、試算優選客戶利潤與介紹金收益時，調用此工具進行100%精準數學計算。",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "numbers_of_people": {
+                        "type": "integer",
+                        "description": "購買 X39 貼片的人數或包數"
+                    }
+                },
+                "required": ["numbers_of_people"]
+            }
+        }
+    }]
+
+    try:
+        # 優化：Temperature 調低到 0.1 爆發極限速度，並且更嚴謹不胡說
+        response = openai_client.chat.com. completions.create(
+            model='gpt-4o-mini',
+            messages=[
+                {"role": "system", "content": system_instruction},
+                {"role": "user", "content": user_message}
+            ],
+            tools=tools,
+            temperature=0.1 
+        )
+        
+        response_message = response.choices[0].message
+        
+        # 🎯 攔截：如果 AI 發現需要算錢，直接調用後台 Python 計算機
+        if response_message.tool_calls:
+            tool_call = response_message.tool_calls[0]
+            args = json.loads(tool_call.function.arguments)
+            
+            # 執行 Python 精準運算
+            bonus_result = calculate_pc_bonus(args.get("numbers_of_people", 0))
+            
+            # 讓 AI 拿到百分之百正確的答案後，再次包裝輸出
+            follow_up_response = openai_client.chat.completions.create(
+                model='gpt-4o-mini',
+                messages=[
+                    {"role": "system", "content": system_instruction},
+                    {"role": "user", "content": user_message},
+                    response_message,
+                    {
+                        "role": "tool",
+                        "tool_call_id": tool_call.id,
+                        "name": "calculate_pc_bonus",
+                        "content": json.dumps(bonus_result, ensure_ascii=False)
+                    }
+                ],
+                temperature=0.1
+            )
+            return follow_up_response.choices[0].message.content
+            
+        return response_message.content
+    except Exception as e:
+        print(f"OpenAI API 發生錯誤: {e}")
+        return "對不起，我剛剛大腦稍微斷線了，請再試一次！"
+
+# --- LINE Webhook 接收端點 ---
+@app.route("/callback", methods=['POST'])
+def callback():
+    signature = request.headers['X-Line-Signature']
+    body = request.get_data(as_text=True)
+
+    try:
+        handler.handle(body, signature)
+    except InvalidSignatureError:
+        abort(400)
+
+    return 'OK'
+
+# --- 🎯 智慧切片與分批發送處理機制 ---
+@handler.add(MessageEvent, message=TextMessageContent)
+def handle_message(event):
+    user_id = event.source.user_id  
+    user_message = event.message.text
+    
+    raw_reply = get_prompt_and_respond(user_id, user_message)
+
+    if "===SPLIT===" in raw_reply:
+        messages_text = raw_reply.split("===SPLIT===")
+    else:
+        parts = re.split(r'\n(?=\d\.\s|【|👉|📢)', raw_reply)
+        if len(parts) > 1:
+            messages_text = parts
+        else:
+            messages_text = [raw_reply]
+
+    final_texts = [t.strip() for t in messages_text if t.strip()][:3]
+    line_messages = [TextMessage(text=msg) for msg in final_texts]
+
+    with ApiClient(line_config) as api_client:
+        line_bot_api = MessagingApi(api_client)
+        line_bot_api.reply_message_with_http_info(
+            ReplyMessageRequest(
+                reply_token=event.reply_token,
+                messages=line_messages  
+            )
+        )
+
+if __name__ == "__main__":
+    app.run(port=5000)
